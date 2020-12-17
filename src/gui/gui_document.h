@@ -71,6 +71,7 @@ signals:
     void viewTrihedronCornerChanged(Qt::Corner corner);
 
 private:
+    void onDocumentColorChanged(TreeNodeId treeNodeId);
     void onDocumentEntityAdded(TreeNodeId entityTreeNodeId);
     void onDocumentEntityAboutToBeDestroyed(TreeNodeId entityTreeNodeId);
 

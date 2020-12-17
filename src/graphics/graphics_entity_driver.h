@@ -13,6 +13,8 @@
 
 namespace Mayo {
 
+class DocumentTreeNode;
+
 class GraphicsEntityDriver {
     Q_DECLARE_TR_FUNCTIONS(Mayo::GraphicsEntityDriver)
 public:
@@ -31,6 +33,8 @@ public:
     virtual Enumeration::Value currentDisplayMode(const GraphicsEntity& entity) const = 0;
 
     virtual std::unique_ptr<PropertyGroupSignals> properties(const GraphicsEntity& entity) const = 0;
+
+    virtual void handleColorChanged(const GraphicsEntity& entity, const DocumentTreeNode& docTreeNode) const {}
 
 protected:
     void setDisplayModes(const Enumeration& enumeration) { m_enumDisplayModes = enumeration; }
@@ -54,6 +58,7 @@ public:
     void applyDisplayMode(GraphicsEntity* entity, Enumeration::Value mode) const override;
     Enumeration::Value currentDisplayMode(const GraphicsEntity& entity) const override;
     std::unique_ptr<PropertyGroupSignals> properties(const GraphicsEntity& entity) const override;
+    void handleColorChanged(const GraphicsEntity& entity, const DocumentTreeNode& docTreeNode) const override;
 
 protected:
     enum DisplayMode {

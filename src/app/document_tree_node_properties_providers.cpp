@@ -21,7 +21,8 @@ class XCaf_DocumentTreeNodePropertiesProvider::Properties : public PropertyGroup
     MAYO_DECLARE_TEXT_ID_FUNCTIONS(Mayo::XCaf_DocumentTreeNodeProperties)
 public:
     Properties(const DocumentTreeNode& treeNode)
-        : m_propertyName(this, textId("Name")),
+        : m_docTreeNode(treeNode),
+          m_propertyName(this, textId("Name")),
           m_propertyShapeType(this, textId("Shape")),
           m_propertyXdeShapeKind(this, textId("XdeShape")),
           m_propertyColor(this, textId("Color")),
@@ -29,13 +30,15 @@ public:
           m_propertyValidationCentroid(this, textId("Centroid")),
           m_propertyValidationArea(this, textId("Area")),
           m_propertyValidationVolume(this, textId("Volume")),
-          m_propertyReferredName(this, textId("ProductName")),
-          m_propertyReferredColor(this, textId("ProductColor")),
-          m_propertyReferredValidationCentroid(this, textId("ProductCentroid")),
-          m_propertyReferredValidationArea(this, textId("ProductArea")),
-          m_propertyReferredValidationVolume(this, textId("ProductVolume")),
+          m_propertyProductName(this, textId("ProductName")),
+          m_propertyProductColor(this, textId("ProductColor")),
+          m_propertyProductValidationCentroid(this, textId("ProductCentroid")),
+          m_propertyProductValidationArea(this, textId("ProductArea")),
+          m_propertyProductValidationVolume(this, textId("ProductVolume")),
           m_label(treeNode.label())
     {
+        Mayo_PropertyChangedBlocker(this);
+
         const TDF_Label& label = m_label;
         const XCaf& xcaf = treeNode.document()->xcaf();
 
@@ -99,52 +102,73 @@ public:
                 this->removeProperty(&m_propertyValidationVolume);
         }
 
-        // Referred entity's properties
+        // Product entity's properties
         if (XCaf::isShapeReference(label)) {
-            m_labelReferred = XCaf::shapeReferred(label);
-            m_propertyReferredName.setValue(CafUtils::labelAttrStdName(m_labelReferred));
-            auto validProps = XCaf::validationProperties(m_labelReferred);
-            m_propertyReferredValidationCentroid.setValue(validProps.centroid);
+            m_labelProduct = XCaf::shapeReferred(label);
+            m_propertyProductName.setValue(CafUtils::labelAttrStdName(m_labelProduct));
+            auto validProps = XCaf::validationProperties(m_labelProduct);
+            m_propertyProductValidationCentroid.setValue(validProps.centroid);
             if (!validProps.hasCentroid)
-                this->removeProperty(&m_propertyReferredValidationCentroid);
+                this->removeProperty(&m_propertyProductValidationCentroid);
 
-            m_propertyReferredValidationArea.setQuantity(validProps.area);
+            m_propertyProductValidationArea.setQuantity(validProps.area);
             if (!validProps.hasArea)
-                this->removeProperty(&m_propertyReferredValidationArea);
+                this->removeProperty(&m_propertyProductValidationArea);
 
-            m_propertyReferredValidationVolume.setQuantity(validProps.volume);
+            m_propertyProductValidationVolume.setQuantity(validProps.volume);
             if (!validProps.hasVolume)
-                this->removeProperty(&m_propertyReferredValidationVolume);
+                this->removeProperty(&m_propertyProductValidationVolume);
 
-            if (xcaf.hasShapeColor(m_labelReferred))
-                m_propertyReferredColor.setValue(xcaf.shapeColor(m_labelReferred));
+            if (xcaf.hasShapeColor(m_labelProduct))
+                m_propertyProductColor.setValue(xcaf.shapeColor(m_labelProduct));
             else
-                this->removeProperty(&m_propertyReferredColor);
+                this->removeProperty(&m_propertyProductColor);
         }
         else {
-            this->removeProperty(&m_propertyReferredName);
-            this->removeProperty(&m_propertyReferredValidationCentroid);
-            this->removeProperty(&m_propertyReferredValidationArea);
-            this->removeProperty(&m_propertyReferredValidationVolume);
-            this->removeProperty(&m_propertyReferredColor);
+            this->removeProperty(&m_propertyProductName);
+            this->removeProperty(&m_propertyProductValidationCentroid);
+            this->removeProperty(&m_propertyProductValidationArea);
+            this->removeProperty(&m_propertyProductValidationVolume);
+            this->removeProperty(&m_propertyProductColor);
         }
 
         for (Property* prop : this->properties())
             prop->setUserReadOnly(true);
 
         m_propertyName.setUserReadOnly(false);
-        m_propertyReferredName.setUserReadOnly(false);
+        m_propertyProductName.setUserReadOnly(false);
+        m_propertyProductColor.setUserReadOnly(false);
     }
 
     void onPropertyChanged(Property* prop) override
     {
         if (prop == &m_propertyName)
             CafUtils::setLabelAttrStdName(m_label, m_propertyName.value());
-        else if (prop == &m_propertyReferredName)
-            CafUtils::setLabelAttrStdName(m_labelReferred, m_propertyReferredName.value());
+        else if (prop == &m_propertyProductName)
+            CafUtils::setLabelAttrStdName(m_labelProduct, m_propertyProductName.value());
+
+        if (prop == &m_propertyColor) {
+            // Not supported for now, shape graphics need to be improved(don't rely on XCAFPrs_AISObject)
+        }
+        else if (prop == &m_propertyProductColor) {
+            const DocumentPtr& doc = m_docTreeNode.document();
+            const Tree<TDF_Label>& modelTree = doc->modelTree();
+            TreeNodeId treeNodeId = m_docTreeNode.id();
+            // In case current node is an "instance" then apply the color change on the "pointed"
+            // product which is the single child of the current node
+            if (doc->xcaf().isShapeReference(m_docTreeNode.label())
+                    && modelTree.nodeChildFirst(treeNodeId) == modelTree.nodeChildLast(treeNodeId))
+            {
+                treeNodeId = modelTree.nodeChildFirst(treeNodeId);
+            }
+
+            m_docTreeNode.document()->changeColor(treeNodeId, m_propertyProductColor.value());
+        }
 
         PropertyGroupSignals::onPropertyChanged(prop);
     }
+
+    DocumentTreeNode m_docTreeNode;
 
     PropertyQString m_propertyName;
     PropertyQString m_propertyShapeType;
@@ -155,14 +179,14 @@ public:
     PropertyArea m_propertyValidationArea;
     PropertyVolume m_propertyValidationVolume;
 
-    PropertyQString m_propertyReferredName;
-    PropertyOccColor m_propertyReferredColor;
-    PropertyOccPnt m_propertyReferredValidationCentroid;
-    PropertyArea m_propertyReferredValidationArea;
-    PropertyVolume m_propertyReferredValidationVolume;
+    PropertyQString m_propertyProductName;
+    PropertyOccColor m_propertyProductColor;
+    PropertyOccPnt m_propertyProductValidationCentroid;
+    PropertyArea m_propertyProductValidationArea;
+    PropertyVolume m_propertyProductValidationVolume;
 
     TDF_Label m_label;
-    TDF_Label m_labelReferred;
+    TDF_Label m_labelProduct;
 };
 
 bool XCaf_DocumentTreeNodePropertiesProvider::supports(const DocumentTreeNode& treeNode) const

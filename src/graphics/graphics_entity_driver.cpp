@@ -7,11 +7,13 @@
 #include "graphics_entity_driver.h"
 
 #include "../base/document.h"
+#include "../base/brep_utils.h"
 #include "../base/caf_utils.h"
 #include "graphics_entity_base_property_group.h"
 #include "graphics_mesh_data_source.h"
 #include "graphics_scene.h"
 
+#include <AIS_ColoredShape.hxx>
 #include <AIS_DisplayMode.hxx>
 #include <BRep_TFace.hxx>
 #include <MeshVS_DisplayModeFlags.hxx>
@@ -160,6 +162,57 @@ std::unique_ptr<PropertyGroupSignals> GraphicsShapeEntityDriver::properties(cons
 {
     this->throwIf_differentDriver(entity);
     return std::make_unique<GraphicsEntityBasePropertyGroup>(entity);
+}
+
+void GraphicsShapeEntityDriver::handleColorChanged(
+        const GraphicsEntity& entity, const DocumentTreeNode& docTreeNode) const
+{
+    this->throwIf_differentDriver(entity);
+    if (!docTreeNode.isValid())
+        return;
+
+    // AIS_ColoredShape is the base class of XCAFPrs_AISObject
+    auto gfx = Handle_AIS_ColoredShape::DownCast(entity.aisObject());
+    if (!gfx)
+        return;
+
+    // Retrieve color
+    const DocumentPtr& doc = docTreeNode.document();
+    Quantity_Color color;
+    if (!doc->xcaf().colorTool()->GetColor(docTreeNode.label(), XCAFDoc_ColorSurf, color))
+        return;
+
+    // Helper function
+    auto fnChangeColor = [=](const TopoDS_Shape& shape){
+        gfx->SetCustomColor(shape, color);
+        gfx->SynchronizeAspects();
+        entity.graphicsScene()->redraw();
+    };
+
+    // Retrieve shape
+    const TopLoc_Location shapeLoc = doc->xcaf().shapeAbsoluteLocation(docTreeNode.id());
+    const TopoDS_Shape shape = XCaf::shape(docTreeNode.label()).Located(shapeLoc);
+
+    // Maybe the shape has "direct" custom aspects
+    if (gfx->CustomAspectsMap().IsBound(shape)) {
+        fnChangeColor(shape);
+        return;
+    }
+
+    // If not then it has "shared" custom aspects with others in a TopoDS_Compound
+    for (AIS_DataMapOfShapeDrawer::Iterator it(gfx->CustomAspectsMap()); it.More(); it.Next()) {
+        const TopoDS_Shape& baseShape = it.Key();
+        bool exitRequested = false;
+        BRepUtils::forEachSubShape(baseShape, TopAbs_SOLID, [&](const TopoDS_Shape& subShape) {
+            if (!exitRequested && subShape.IsSame(shape)) {
+                fnChangeColor(baseShape);
+                exitRequested = true;
+            }
+        });
+
+        if (exitRequested)
+            return;
+    }
 }
 
 GraphicsMeshEntityDriver::GraphicsMeshEntityDriver()

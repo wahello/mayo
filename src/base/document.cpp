@@ -137,6 +137,22 @@ DocumentTreeNode Document::entityTreeNode(int index) const
     return { DocumentPtr(this), this->entityTreeNodeId(index) };
 }
 
+void Document::changeColor(TreeNodeId nodeId, const Quantity_Color& color)
+{
+    if (!this->isXCafDocument())
+        return;
+
+    if (!m_xcaf.colorTool())
+        return;
+
+    const TDF_Label& nodeLabel = m_modelTree.nodeData(nodeId);
+    if (nodeLabel.IsNull())
+        return;
+
+    m_xcaf.colorTool()->SetColor(nodeLabel, color, XCAFDoc_ColorSurf);
+    emit this->colorChanged(nodeId);
+}
+
 void Document::rebuildModelTree()
 {
     m_modelTree.clear();

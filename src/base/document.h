@@ -53,6 +53,8 @@ public:
     TreeNodeId entityTreeNodeId(int index) const;
     DocumentTreeNode entityTreeNode(int index) const;
 
+    void changeColor(TreeNodeId nodeId, const Quantity_Color& color);
+
     const Tree<TDF_Label>& modelTree() const { return m_modelTree; }
     void rebuildModelTree();
 
@@ -63,6 +65,7 @@ public:
 
 signals:
     void nameChanged(const QString& name);
+    void colorChanged(TreeNodeId treeNodeId);
     void entityAdded(TreeNodeId entityTreeNodeId);
     void entityAboutToBeDestroyed(TreeNodeId entityTreeNodeId);
     //void itemPropertyChanged(DocumentItem* docItem, Property* prop);

@@ -96,6 +96,7 @@ GuiDocument::GuiDocument(const DocumentPtr& doc, GuiApplication* guiApp)
     for (int i = 0; i < doc->entityCount(); ++i)
         this->mapGraphics(doc->entityTreeNodeId(i));
 
+    QObject::connect(doc.get(), &Document::colorChanged, this, &GuiDocument::onDocumentColorChanged);
     QObject::connect(doc.get(), &Document::entityAdded, this, &GuiDocument::onDocumentEntityAdded);
     QObject::connect(
                 doc.get(), &Document::entityAboutToBeDestroyed,
@@ -279,6 +280,16 @@ int GuiDocument::aisViewCubeBoundingSize() const
 #else
     return 0;
 #endif
+}
+
+void GuiDocument::onDocumentColorChanged(TreeNodeId treeNodeId)
+{
+    const TreeNodeId entityTreeNodeId = m_document->modelTree().nodeRoot(treeNodeId);
+    const GraphicsItem* gfxItem = this->findGraphicsItem(entityTreeNodeId);
+    if (gfxItem) {
+        const GraphicsEntity& gfxEntity = gfxItem->graphicsEntity;
+        gfxEntity.driverPtr()->handleColorChanged(gfxEntity, { m_document, treeNodeId });
+    }
 }
 
 void GuiDocument::onDocumentEntityAdded(TreeNodeId entityTreeNodeId)
