@@ -31,7 +31,8 @@ struct OccStaticVariablesRollback::Private {
             record.value = Interface_Static::RVal(strKey);
         }
         else if constexpr(std::is_same<std::string_view, T>::value) {
-            record.value = Interface_Static::CVal(strKey);
+            const std::string strVal = Interface_Static::CVal(strKey);
+            record.value = std::move(strVal);
         }
 
         return record;
