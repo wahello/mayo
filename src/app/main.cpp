@@ -10,6 +10,7 @@
 #include "../base/messenger.h"
 #include "../base/settings.h"
 #include "../base/task_manager.h"
+#include "../io_assimp/io_assimp.h"
 #include "../io_dxf/io_dxf.h"
 #include "../io_gmio/io_gmio.h"
 #include "../io_occ/io_occ.h"
@@ -175,6 +176,7 @@ static void initBase(QCoreApplication* qtApp)
     app->ioSystem()->addFactoryReader(std::make_unique<IO::DxfFactoryReader>());
     app->ioSystem()->addFactoryWriter(std::make_unique<IO::OccFactoryWriter>());
     app->ioSystem()->addFactoryWriter(IO::GmioFactoryWriter::create());
+    app->ioSystem()->addFactoryReader(IO::AssimpFactoryReader::create());
     IO::addPredefinedFormatProbes(app->ioSystem());
 
     // Register providers to query document tree node properties
