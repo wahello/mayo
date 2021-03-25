@@ -120,13 +120,6 @@ private:
     QuantityType m_quantity = {};
 };
 
-// Silent Clang warnings about instantiation of variable 'Mayo::GenericProperty<T>::TypeName'
-// required here, but no definition is available
-#ifdef Q_CC_CLANG
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wundefined-var-template"
-#endif
-
 using PropertyBool = GenericProperty<bool>;
 using PropertyInt = GenericScalarProperty<int>;
 using PropertyDouble = GenericScalarProperty<double>;
@@ -138,24 +131,6 @@ using PropertyQDateTime = GenericProperty<QDateTime>;
 using PropertyOccPnt = GenericProperty<gp_Pnt>;
 using PropertyOccTrsf = GenericProperty<gp_Trsf>;
 
-#ifdef Q_CC_CLANG
-#  pragma GCC diagnostic pop
-#endif
-
-#if 0
-// Explicit template declarations
-template<> const char PropertyBool::TypeName[];
-template<> const char GenericProperty<int>::TypeName[];
-template<> const char GenericProperty<double>::TypeName[];
-template<> const char GenericProperty<Qt::CheckState>::TypeName[];
-template<> const char PropertyQByteArray::TypeName[];
-template<> const char PropertyQString::TypeName[];
-template<> const char PropertyQStringList::TypeName[];
-template<> const char PropertyQDateTime::TypeName[];
-template<> const char PropertyOccPnt::TypeName[];
-template<> const char PropertyOccTrsf::TypeName[];
-template<> const char GenericProperty<Quantity_Color>::TypeName[];
-#endif
 
 //using PropertyOccColor = GenericProperty<Quantity_Color>;
 class PropertyOccColor : public GenericProperty<Quantity_Color> {
