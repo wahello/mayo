@@ -44,7 +44,7 @@ release_with_debuginfo:*msvc* {
 }
 *clang-libc++* {
     # See https://libcxx.llvm.org/docs/UsingLibcxx.html
-    LIBS += -lc++fs
+    LIBS += -lc++fs -lc++abi
 }
 macx {
     QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.14
