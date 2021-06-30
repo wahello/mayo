@@ -5,11 +5,12 @@
 ****************************************************************************/
 
 #include "io_assimp_reader.h"
+#include "../base/messenger.h"
 #include "../base/property.h"
 
-#include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 #include <gp_Trsf.hxx>
 
@@ -30,8 +31,8 @@ bool AssimpReader::readFile(const FilePath& filepath, TaskProgress* progress)
     // Assimp::Importer::SetProgressHandler()
     const unsigned flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace;
     m_scene = m_importer.ReadFile(filepath.u8string().c_str(), flags);
-    if(!m_scene || (m_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) || !m_scene->mRootNode) {
-        //qDebug() << "ERROR::ASSIMP:: " << t_importer.GetErrorString();
+    if (!m_scene || (m_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) || !m_scene->mRootNode) {
+        this->messenger()->emitError(m_importer.GetErrorString());
         return false;
     }
 
@@ -53,13 +54,13 @@ static void transferNode(const aiNode* node, const aiScene* scene)
                    matrix.c1 / scalingZ, matrix.c2 / scalingZ, matrix.c3 / scalingZ, matrix.c4);
 }
 
-bool AssimpReader::transfer(DocumentPtr doc, TaskProgress* progress)
+TDF_LabelSequence AssimpReader::transfer(DocumentPtr doc, TaskProgress* progress)
 {
     if (!m_scene)
-        return false;
+        return {};
 
     transferNode(m_scene->mRootNode, m_scene);
-    return true;
+    return {};
 }
 
 std::unique_ptr<PropertyGroup> AssimpReader::createProperties(PropertyGroup* parentGroup)
