@@ -65,6 +65,7 @@ HEADERS += \
     $$files(src/graphics/*.h) \
     $$files(src/gui/*.h) \
     $$files(src/app/*.h) \
+    src/io_dxf/io_dxf.h
 
 SOURCES += \
     $$files(src/base/*.cpp) \
@@ -73,6 +74,7 @@ SOURCES += \
     $$files(src/graphics/*.cpp) \
     $$files(src/gui/*.cpp) \
     $$files(src/app/*.cpp) \
+    src/io_dxf/io_dxf.cpp
 
 win* {
     QT += winextras

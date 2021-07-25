@@ -1,8 +1,11 @@
 #pragma once
 
 #include <algorithm>
+#include <cfloat>
 #include <cmath>
 #include <limits>
+
+// Implement required FreeCad classes/functions for the sake of dxf.h,cpp and io_dxf.h,cpp
 
 namespace Base {
 
