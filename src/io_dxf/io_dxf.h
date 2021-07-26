@@ -6,10 +6,7 @@
 
 #pragma once
 
-#include "dxf.h"
-
 #include "../base/io_reader.h"
-#include <gp_Pnt.hxx>
 #include <TopoDS_Shape.hxx>
 #include <map>
 #include <string>
@@ -19,7 +16,7 @@ namespace Mayo {
 namespace IO {
 
 // Reader for DXF file format based on FreeCad's CDxfRead
-class DxfReader : public Reader, private CDxfRead {
+class DxfReader : public Reader {
 public:
     bool readFile(const FilePath& filepath, TaskProgress* progress) override;
     TDF_LabelSequence transfer(DocumentPtr doc, TaskProgress* progress) override;
@@ -29,27 +26,23 @@ public:
         bool importAnnotations = true;
         bool groupLayers = false;
     };
+    Parameters& parameters() { return m_params; }
+    const Parameters& constParameters() const { return m_params; }
+
+    static std::unique_ptr<PropertyGroup> createProperties(PropertyGroup* parentGroup);
+    void applyProperties(const PropertyGroup* params) override;
 
 private:
-    // CDxfRead's virtual functions
-    void OnReadLine(const double* s, const double* e, bool hidden) override;
-    void OnReadPoint(const double* s) override;
-    void OnReadText(const double* point, const double height, const char* text) override;
-    void OnReadArc(const double* s, const double* e, const double* c, bool dir, bool hidden) override;
-    void OnReadCircle(const double* s, const double* c, bool dir, bool hidden) override;
-    void OnReadEllipse(const double* c, double major_radius, double minor_radius, double rotation, double start_angle, double end_angle, bool dir) override;
-    void OnReadSpline(struct SplineData& sd) override;
-    void OnReadInsert(const double* point, const double* scale, const char* name, double rotation) override;
-    void OnReadDimension(const double* s, const double* e, const double* point, double rotation) override;
-    void AddGraphics() const override;
-
-    gp_Pnt toPnt(const double* coords) const;
-    void addShape(const TopoDS_Shape& shape);
-
-    TopoDS_Shape m_shape;
-    FilePath m_baseFilename;
+    class Properties;
     std::map<std::string, std::vector<TopoDS_Shape>> m_layers;
     Parameters m_params;
+};
+
+class DxfFactoryReader : public FactoryReader {
+public:
+    Span<const Format> formats() const override;
+    std::unique_ptr<Reader> create(Format format) const override;
+    std::unique_ptr<PropertyGroup> createProperties(Format format, PropertyGroup* parentGroup) const override;
 };
 
 } // namespace IO
