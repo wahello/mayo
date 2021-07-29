@@ -1752,7 +1752,6 @@ CDxfRead::CDxfRead(const char* filepath)
     m_ifs = new ifstream(filepath);
     if(!(*m_ifs)){
         m_fail = true;
-        printf("DXF file didn't load\n");
         return;
     }
     m_ifs->imbue(std::locale("C"));
@@ -1812,7 +1811,7 @@ bool CDxfRead::ReadLine()
 
         if(sscanf(m_str, "%d", &n) != 1)
         {
-            printf("CDxfRead::ReadLine() Failed to read integer from '%s'\n", m_str );
+            this->ReportError_readInteger("DXF::ReadLine()");
             return false;
         }
 
@@ -1910,7 +1909,7 @@ bool CDxfRead::ReadPoint()
 
         if(sscanf(m_str, "%d", &n) != 1)
         {
-            printf("CDxfRead::ReadPoint() Failed to read integer from '%s'\n", m_str );
+            this->ReportError_readInteger("DXF::ReadPoint()");
             return false;
         }
 
@@ -1993,7 +1992,7 @@ bool CDxfRead::ReadArc()
         int n;
         if(sscanf(m_str, "%d", &n) != 1)
         {
-            printf("CDxfRead::ReadArc() Failed to read integer from '%s'\n", m_str);
+            this->ReportError_readInteger("DXF::ReadArc()");
             return false;
         }
 
@@ -2099,7 +2098,7 @@ bool CDxfRead::ReadSpline()
         int n;
         if(sscanf(m_str, "%d", &n) != 1)
         {
-            printf("CDxfRead::ReadSpline() Failed to read integer from '%s'\n", m_str);
+            this->ReportError_readInteger("DXF::ReadSpline()");
             return false;
         }
         std::istringstream ss;
@@ -2273,7 +2272,7 @@ bool CDxfRead::ReadCircle()
         int n;
         if(sscanf(m_str, "%d", &n) != 1)
         {
-            printf("CDxfRead::ReadCircle() Failed to read integer from '%s'\n", m_str);
+            this->ReportError_readInteger("DXF::ReadCircle()");
             return false;
         }
         std::istringstream ss;
@@ -2355,7 +2354,7 @@ bool CDxfRead::ReadText()
         int n;
         if(sscanf(m_str, "%d", &n) != 1)
         {
-            printf("CDxfRead::ReadText() Failed to read integer from '%s'\n", m_str);
+            this->ReportError_readInteger("DXF::ReadText()");
             return false;
         }
         std::istringstream ss;
@@ -2434,7 +2433,7 @@ bool CDxfRead::ReadEllipse()
         int n;
         if(sscanf(m_str, "%d", &n) != 1)
         {
-            printf("CDxfRead::ReadEllipse() Failed to read integer from '%s'\n", m_str);
+            this->ReportError_readInteger("DXF::ReadEllipse()");
             return false;
         }
         std::istringstream ss;
@@ -2604,7 +2603,7 @@ bool CDxfRead::ReadLwPolyLine()
         int n;
         if(sscanf(m_str, "%d", &n) != 1)
         {
-            printf("CDxfRead::ReadLwPolyLine() Failed to read integer from '%s'\n", m_str);
+            this->ReportError_readInteger("DXF::ReadLwPolyLine()");
             return false;
         }
         std::istringstream ss;
@@ -2709,7 +2708,7 @@ bool CDxfRead::ReadVertex(double *pVertex, bool *bulge_found, double *bulge)
         get_line();
         int n;
         if(sscanf(m_str, "%d", &n) != 1) {
-            printf("CDxfRead::ReadVertex() Failed to read integer from '%s'\n", m_str);
+            this->ReportError_readInteger("DXF::ReadVertex()");
             return false;
         }
         std::istringstream ss;
@@ -2784,7 +2783,7 @@ bool CDxfRead::ReadPolyLine()
         int n;
         if(sscanf(m_str, "%d", &n) != 1)
         {
-            printf("CDxfRead::ReadPolyLine() Failed to read integer from '%s'\n", m_str);
+            this->ReportError_readInteger("DXF::ReadPolyLine()");
             return false;
         }
         std::istringstream ss;
@@ -2906,7 +2905,7 @@ bool CDxfRead::ReadInsert()
         int n;
         if(sscanf(m_str, "%d", &n) != 1)
         {
-            printf("CDxfRead::ReadInsert() Failed to read integer from '%s'\n", m_str);
+            this->ReportError_readInteger("DXF::ReadInsert()");
             return false;
         }
         std::istringstream ss;
@@ -2998,7 +2997,7 @@ bool CDxfRead::ReadDimension()
         int n;
         if(sscanf(m_str, "%d", &n) != 1)
         {
-            printf("CDxfRead::ReadInsert() Failed to read integer from '%s'\n", m_str);
+            this->ReportError_readInteger("DXF::ReadDimension()");
             return false;
         }
         std::istringstream ss;
@@ -3095,7 +3094,7 @@ bool CDxfRead::ReadBlockInfo()
         int n;
         if(sscanf(m_str, "%d", &n) != 1)
         {
-            printf("CDxfRead::ReadBlockInfo() Failed to read integer from '%s'\n", m_str);
+            this->ReportError_readInteger("DXF::ReadBlockInfo()");
             return false;
         }
         std::istringstream ss;
@@ -3178,7 +3177,7 @@ bool CDxfRead::ReadUnits()
     } // End if - then
     else
     {
-        printf("CDxfRead::ReadUnits() Failed to get integer from '%s'\n", m_str);
+        this->ReportError_readInteger("DXF::ReadUnits()");
         return(false);
     }
 }
@@ -3196,7 +3195,7 @@ bool CDxfRead::ReadLayer()
 
         if(sscanf(m_str, "%d", &n) != 1)
         {
-            printf("CDxfRead::ReadLayer() Failed to read integer from '%s'\n", m_str );
+            this->ReportError_readInteger("DXF::ReadLayer()");
             return false;
         }
 
@@ -3204,9 +3203,9 @@ bool CDxfRead::ReadLayer()
         ss.imbue(std::locale("C"));
         switch(n){
             case 0: // next item found, so finish with line
-                    if (layername.empty())
+                if (layername.empty())
                 {
-                    printf("CDxfRead::ReadLayer() - no layer name\n");
+                    this->ReportError("DXF::ReadLayer() - No layer name");
                     return false;
                 }
                     m_layer_aci[layername] = aci;
@@ -3288,7 +3287,7 @@ void CDxfRead::DoRead(const bool ignore_errors /* = false */ )
               get_line();
               if(!ReadLayer())
                 {
-                  printf("CDxfRead::DoRead() Failed to read layer\n");
+                  this->ReportError("DXF::DoRead() - Failed to read layer");
                   //return; Some objects or tables can have "LAYER" as name...
                 }
               continue;     
@@ -3297,7 +3296,7 @@ void CDxfRead::DoRead(const bool ignore_errors /* = false */ )
         else if (!strcmp( m_str, "BLOCK" )) {
             if(!ReadBlockInfo())
             {
-                printf("CDxfRead::DoRead() Failed to read block info\n");
+                this->ReportError("DXF::DoRead() - Failed to read block info");
                 return;
             }
             continue;
@@ -3310,7 +3309,7 @@ void CDxfRead::DoRead(const bool ignore_errors /* = false */ )
         else if(!strcmp(m_str, "LINE")){
                 if(!ReadLine())
                 {
-                    printf("CDxfRead::DoRead() Failed to read line\n");
+                    this->ReportError("DXF::DoRead() - Failed to read line");
                     return;
                 }
                 continue;
@@ -3318,7 +3317,7 @@ void CDxfRead::DoRead(const bool ignore_errors /* = false */ )
             else if(!strcmp(m_str, "ARC")){
                 if(!ReadArc())
                 {
-                    printf("CDxfRead::DoRead() Failed to read arc\n");
+                    this->ReportError("DXF::DoRead() - Failed to read arc");
                     return;
                 }
                 continue;
@@ -3326,7 +3325,7 @@ void CDxfRead::DoRead(const bool ignore_errors /* = false */ )
             else if(!strcmp(m_str, "CIRCLE")){
                 if(!ReadCircle())
                 {
-                    printf("CDxfRead::DoRead() Failed to read circle\n");
+                    this->ReportError("DXF::DoRead() - Failed to read circle");
                     return;
                 }
                 continue;
@@ -3334,7 +3333,7 @@ void CDxfRead::DoRead(const bool ignore_errors /* = false */ )
             else if(!strcmp(m_str, "MTEXT")){
                 if(!ReadText())
                 {
-                    printf("CDxfRead::DoRead() Failed to read text\n");
+                    this->ReportError("DXF::DoRead() - Failed to read text");
                     return;
                 }
                 continue;
@@ -3342,7 +3341,7 @@ void CDxfRead::DoRead(const bool ignore_errors /* = false */ )
             else if(!strcmp(m_str, "TEXT")){
                 if(!ReadText())
                 {
-                    printf("CDxfRead::DoRead() Failed to read text\n");
+                    this->ReportError("DXF::DoRead() - Failed to read text");
                     return;
                 }
                 continue;
@@ -3350,7 +3349,7 @@ void CDxfRead::DoRead(const bool ignore_errors /* = false */ )
             else if(!strcmp(m_str, "ELLIPSE")){
                 if(!ReadEllipse())
                 {
-                    printf("CDxfRead::DoRead() Failed to read ellipse\n");
+                    this->ReportError("DXF::DoRead() - Failed to read ellipse");
                     return;
                 }
                 continue;
@@ -3358,7 +3357,7 @@ void CDxfRead::DoRead(const bool ignore_errors /* = false */ )
             else if(!strcmp(m_str, "SPLINE")){
                 if(!ReadSpline())
                 {
-                    printf("CDxfRead::DoRead() Failed to read spline\n");
+                    this->ReportError("DXF::DoRead() - Failed to read spline");
                     return;
                 }
                 continue;
@@ -3366,7 +3365,7 @@ void CDxfRead::DoRead(const bool ignore_errors /* = false */ )
             else if (!strcmp(m_str, "LWPOLYLINE")) {
                 if(!ReadLwPolyLine())
                 {
-                    printf("CDxfRead::DoRead() Failed to read LW Polyline\n");
+                    this->ReportError("DXF::DoRead() - Failed to read LW Polyline");
                     return;
                 }
                 continue;
@@ -3374,7 +3373,7 @@ void CDxfRead::DoRead(const bool ignore_errors /* = false */ )
             else if (!strcmp(m_str, "POLYLINE")) {
                 if(!ReadPolyLine())
                 {
-                    printf("CDxfRead::DoRead() Failed to read Polyline\n");
+                    this->ReportError("DXF::DoRead() - Failed to read Polyline");
                     return;
                 }
                 continue;
@@ -3382,7 +3381,7 @@ void CDxfRead::DoRead(const bool ignore_errors /* = false */ )
             else if (!strcmp(m_str, "POINT")) {
                 if(!ReadPoint())
                 {
-                    printf("CDxfRead::DoRead() Failed to read Point\n");
+                    this->ReportError("DXF::DoRead() - Failed to read Point");
                     return;
                 }
                 continue;
@@ -3390,7 +3389,7 @@ void CDxfRead::DoRead(const bool ignore_errors /* = false */ )
             else if (!strcmp(m_str, "INSERT")) {
                 if(!ReadInsert())
                 {
-                    printf("CDxfRead::DoRead() Failed to read Insert\n");
+                    this->ReportError("DXF::DoRead() - Failed to read Insert");
                     return;
                 }
                 continue;
@@ -3398,7 +3397,7 @@ void CDxfRead::DoRead(const bool ignore_errors /* = false */ )
             else if (!strcmp(m_str, "DIMENSION")) {
                 if(!ReadDimension())
                 {
-                    printf("CDxfRead::DoRead() Failed to read Dimension\n");
+                    this->ReportError("DXF::DoRead() - Failed to read Dimension");
                     return;
                 }
                 continue;
@@ -3418,6 +3417,20 @@ void  CDxfRead::DerefACI()
     {
          m_aci = m_layer_aci[std::string(m_layer_name)];
     }
+}
+
+void CDxfRead::ReportError_readInteger(const char* context)
+{
+    std::string msg;
+    if (context) {
+        msg += context;
+        msg += " - ";
+    }
+
+    msg += "Failed to read integer from '";
+    msg += m_str;
+    msg += "'";
+    this->ReportError(msg.c_str());
 }
 
 streamsize CDxfRead::gcount() const
