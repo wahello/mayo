@@ -3267,6 +3267,8 @@ void CDxfRead::DoRead(const bool ignore_errors /* = false */ )
 
     while(!((*m_ifs).eof()))
     {
+        m_aci = 256;
+
         if (!strcmp( m_str, "$INSUNITS" )){
             if (!ReadUnits())return;
             continue;
