@@ -226,6 +226,12 @@ isEmpty(ASSIMP_ROOT) {
     SOURCES += $$files(src/io_assimp/*.cpp)
 
     INCLUDEPATH += $$ASSIMP_ROOT/include
-    LIBS += -L$$ASSIMP_ROOT/lib -lassimp-vc142-mtd -lzlibstaticd
+    LIBS += -L$$ASSIMP_ROOT/lib
+    CONFIG(debug, debug|release) {
+        LIBS += -lassimp-vc142-mtd -lzlibstaticd
+    } else {
+        LIBS +=-lassimp-vc142-mtd -lzlibstatic
+    }
+
     DEFINES += HAVE_ASSIMP
 }

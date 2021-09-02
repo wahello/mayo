@@ -14,7 +14,7 @@ Span<const Format> AssimpFactoryReader::formats() const
 {
     static const Format array[] = {
         Format_AMF, Format_3DS, Format_3MF, Format_COLLADA, Format_FBX, Format_GLTF,
-        Format_IFC, Format_OBJ, Format_OFF, Format_PLY, Format_STL, Format_X3D
+        Format_OBJ, Format_OFF, Format_PLY, Format_STL, Format_X3D
     };
     return array;
 }

@@ -14,19 +14,6 @@ namespace IO {
 
 std::string_view formatIdentifier(Format format)
 {
-    switch (format) {
-    case Format_Unknown: return "";
-    case Format_STEP: return "STEP";
-    case Format_IGES: return "IGES";
-    case Format_OCCBREP: return "OCCBREP";
-    case Format_STL:  return "STL";
-    case Format_OBJ:  return "OBJ";
-    case Format_GLTF: return "GLTF";
-    case Format_VRML: return "VRML";
-    case Format_AMF:  return "AMF";
-    case Format_DXF:  return "DXF";
-    }
-
     return MetaEnum::nameWithoutPrefix(format, "Format_");
 }
 
@@ -58,16 +45,16 @@ std::string_view formatName(Format format)
 }
 
 Span<std::string_view> formatFileSuffixes(Format format)
-{
-    static std::string_view step_suffix[] = { "step", "stp" };
-    static std::string_view iges_suffix[] = { "iges", "igs" };
-    static std::string_view occ_suffix[] =  { "brep", "rle", "occ" };
-    static std::string_view stl_suffix[] =  { "stl" };
-    static std::string_view obj_suffix[] =  { "obj" };
-    static std::string_view gltf_suffix[] = { "gltf", "glb" };
-    static std::string_view vrml_suffix[] = { "wrl", "wrz", "vrml" };
-    static std::string_view amf_suffix[] =  { "amf" };
-    static std::string_view dxf_suffix[] =  { "dxf" };
+{  
+    static std::string_view suffix_step[] = { "step", "stp" };
+    static std::string_view suffix_iges[] = { "iges", "igs" };
+    static std::string_view suffix_occ[] =  { "brep", "rle", "occ" };
+    static std::string_view suffix_stl[] =  { "stl" };
+    static std::string_view suffix_obj[] =  { "obj" };
+    static std::string_view suffix_gltf[] = { "gltf", "glb" };
+    static std::string_view suffix_vrml[] = { "wrl", "wrz", "vrml" };
+    static std::string_view suffix_amf[] =  { "amf" };
+    static std::string_view suffix_dxf[] =  { "dxf" };
     //
     static std::string_view suffix_3ds[] =  { "3ds" };
     static std::string_view suffix_3mf[] =  { "3mf" };
@@ -80,15 +67,15 @@ Span<std::string_view> formatFileSuffixes(Format format)
 
     switch (format) {
     case Format_Unknown: return {};
-    case Format_STEP: return step_suffix;
-    case Format_IGES: return iges_suffix;
-    case Format_OCCBREP: return occ_suffix;
-    case Format_STL:  return stl_suffix;
-    case Format_OBJ:  return obj_suffix;
-    case Format_GLTF: return gltf_suffix;
-    case Format_VRML: return vrml_suffix;
-    case Format_AMF:  return amf_suffix;
-    case Format_DXF:  return dxf_suffix;
+    case Format_STEP: return suffix_step;
+    case Format_IGES: return suffix_iges;
+    case Format_OCCBREP: return suffix_occ;
+    case Format_STL:  return suffix_stl;
+    case Format_OBJ:  return suffix_obj;
+    case Format_GLTF: return suffix_gltf;
+    case Format_VRML: return suffix_vrml;
+    case Format_AMF:  return suffix_amf;
+    case Format_DXF:  return suffix_dxf;
         //
     case Format_3DS: return suffix_3ds;
     case Format_3MF: return suffix_3mf;
@@ -105,7 +92,7 @@ Span<std::string_view> formatFileSuffixes(Format format)
 
 bool formatProvidesBRep(Format format)
 {
-    static const Format brepFormats[] = { Format_STEP, Format_IGES, Format_OCCBREP, Format_DXF };
+    static const Format brepFormats[] = { Format_STEP, Format_IGES, Format_OCCBREP, Format_DXF, Format_IFC };
     return std::any_of(
                 std::cbegin(brepFormats),
                 std::cend(brepFormats),

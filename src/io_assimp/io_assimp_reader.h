@@ -10,6 +10,11 @@
 #include "../base/io_reader.h"
 
 #include <assimp/Importer.hpp>
+#include <TopoDS_Shape.hxx>
+#include <unordered_map>
+
+struct aiMesh;
+struct aiNode;
 
 namespace Mayo {
 namespace IO {
@@ -23,9 +28,12 @@ public:
     void applyProperties(const PropertyGroup* params) override;
 
 private:
+    void transferSceneNode(const aiNode* node, DocumentPtr doc, TDF_LabelSequence& seqLabel);
+
     class Properties;
     Assimp::Importer m_importer;
     const aiScene* m_scene = nullptr;
+    std::unordered_map<const aiMesh*, TopoDS_Shape> m_mapMeshShape;
 };
 
 } // namespace IO
